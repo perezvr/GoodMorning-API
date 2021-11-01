@@ -21,7 +21,7 @@ namespace Redis
             services.AddStackExchangeRedisCache(options =>
             {
                 options.InstanceName = Configuration.GetSection("Redis:InstanceName").Value;
-                options.Configuration = "localhost:6379";
+                options.Configuration = Configuration.GetSection("Redis:ConnectionString").Value;
 
             });
 

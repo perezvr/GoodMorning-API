@@ -36,12 +36,18 @@ namespace Redis.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
+            _logger.LogInformation("processing new GetForecast request");
+
             var forecastKey = "forecast";
+            var timeout = int.Parse(_configuration.GetSection("Redis:GetForecastTimeout").Value);
 
             var cachedObject = await _distributedCache.GetStringAsync(forecastKey);
 
             if (!string.IsNullOrEmpty(cachedObject))
+            {
+                _logger.LogInformation("returned by Redis");
                 return Ok(JsonConvert.DeserializeObject<Response>(cachedObject));
+            }
             else
             {
                 var client = new RestClient("https://weatherbit-v1-mashape.p.rapidapi.com/forecast/daily?lat=-22.5252&lon=-44.1038");
@@ -54,10 +60,12 @@ namespace Redis.Controllers
 
                 var memoryCacheEntryOptions = new DistributedCacheEntryOptions()
                 {
-                    AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(int.Parse(_configuration.GetSection("Redis:GetForecastTimeout").Value)),
+                    AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(timeout),
                 };
 
                 await _distributedCache.SetStringAsync(forecastKey, response.Content, memoryCacheEntryOptions);
+
+                _logger.LogInformation("returned by API");
                 return Ok(body);
             }
         }
