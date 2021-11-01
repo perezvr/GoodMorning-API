@@ -9,9 +9,9 @@
     },
   "profiles": {
     "IIS Express": {
-      "commandName": "IISExpress",
-      "launchBrowser": true,
-      "launchUrl": "weatherforecast",
+        "commandName": "IISExpress",
+        "launchBrowser": true,
+        "launchUrl": "weatherforecast?lat=-22.5252&lon=-44.1038",
         "environmentVariables": {
             "ASPNETCORE_ENVIRONMENT": "Development",
             "var_redis_instance_name": "ForecastCache",

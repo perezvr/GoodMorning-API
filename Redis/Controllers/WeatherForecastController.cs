@@ -30,37 +30,36 @@ namespace Redis.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get()
+        public async Task<IActionResult> Get([FromQuery] Request request)
         {
             Response responseBody = null;
+
             try
             {
                 _logger.LogInformation("processing new GetForecast request");
 
-                var forecastKey = "forecast";
-                var timeout = int.Parse(_configuration.GetSection("Redis:GetForecastTimeout").Value);
+                var forecastKeyPrefix = "forecast";
 
+                var forecastKey = string.Join("|", forecastKeyPrefix, request.Lat, request.Lon);
                 var cachedObject = await _distributedCache.GetStringAsync(forecastKey);
 
                 responseBody = JsonConvert.DeserializeObject<Response>(cachedObject ?? string.Empty);
 
                 if (responseBody != null)
-                {
                     _logger.LogInformation("returned by Redis");
-                }
                 else
                 {
-                    var client = new RestClient("https://weatherbit-v1-mashape.p.rapidapi.com/forecast/daily?lat=-22.5252&lon=-44.1038");
-                    var request = new RestRequest(Method.GET);
-                    request.AddHeader("x-rapidapi-host", "weatherbit-v1-mashape.p.rapidapi.com");
-                    request.AddHeader("x-rapidapi-key", "477cde4760msh954a62f20d6a2c8p1cb081jsna55c2b25b7a2");
-                    IRestResponse response = client.Execute(request);
+                    var client = new RestClient($"https://weatherbit-v1-mashape.p.rapidapi.com/forecast/daily?lat={request.Lat}&lon={request.Lon}");
+                    var forecastRequest = new RestRequest(Method.GET);
+                    forecastRequest.AddHeader("x-rapidapi-host", "weatherbit-v1-mashape.p.rapidapi.com");
+                    forecastRequest.AddHeader("x-rapidapi-key", "477cde4760msh954a62f20d6a2c8p1cb081jsna55c2b25b7a2");
+                    IRestResponse response = client.Execute(forecastRequest);
 
                     responseBody = JsonConvert.DeserializeObject<Response>(response.Content);
 
                     var memoryCacheEntryOptions = new DistributedCacheEntryOptions()
                     {
-                        AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(timeout),
+                        AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(int.Parse(_configuration.GetSection("Redis:GetForecastTimeout").Value)),
                     };
 
                     await _distributedCache.SetStringAsync(forecastKey, response.Content, memoryCacheEntryOptions);
