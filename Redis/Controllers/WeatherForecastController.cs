@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using Redis.Dto;
 using RestSharp;
 using System;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace Redis.Controllers
@@ -14,11 +15,6 @@ namespace Redis.Controllers
     [Route("[controller]")]
     public class WeatherForecastController : ControllerBase
     {
-        private static readonly string[] Summaries = new[]
-        {
-            "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-        };
-
         private readonly ILogger<WeatherForecastController> _logger;
         private readonly IDistributedCache _distributedCache;
         private readonly IConfiguration _configuration;
@@ -36,38 +32,51 @@ namespace Redis.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            _logger.LogInformation("processing new GetForecast request");
-
-            var forecastKey = "forecast";
-            var timeout = int.Parse(_configuration.GetSection("Redis:GetForecastTimeout").Value);
-
-            var cachedObject = await _distributedCache.GetStringAsync(forecastKey);
-
-            if (!string.IsNullOrEmpty(cachedObject))
+            Response responseBody = null;
+            try
             {
-                _logger.LogInformation("returned by Redis");
-                return Ok(JsonConvert.DeserializeObject<Response>(cachedObject));
-            }
-            else
-            {
-                var client = new RestClient("https://weatherbit-v1-mashape.p.rapidapi.com/forecast/daily?lat=-22.5252&lon=-44.1038");
-                var request = new RestRequest(Method.GET);
-                request.AddHeader("x-rapidapi-host", "weatherbit-v1-mashape.p.rapidapi.com");
-                request.AddHeader("x-rapidapi-key", "477cde4760msh954a62f20d6a2c8p1cb081jsna55c2b25b7a2");
-                IRestResponse response = client.Execute(request);
+                _logger.LogInformation("processing new GetForecast request");
 
-                var body = JsonConvert.DeserializeObject<Response>(response.Content);
+                var forecastKey = "forecast";
+                var timeout = int.Parse(_configuration.GetSection("Redis:GetForecastTimeout").Value);
 
-                var memoryCacheEntryOptions = new DistributedCacheEntryOptions()
+                var cachedObject = await _distributedCache.GetStringAsync(forecastKey);
+
+                responseBody = JsonConvert.DeserializeObject<Response>(cachedObject ?? string.Empty);
+
+                if (responseBody != null)
                 {
-                    AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(timeout),
-                };
+                    _logger.LogInformation("returned by Redis");
+                }
+                else
+                {
+                    var client = new RestClient("https://weatherbit-v1-mashape.p.rapidapi.com/forecast/daily?lat=-22.5252&lon=-44.1038");
+                    var request = new RestRequest(Method.GET);
+                    request.AddHeader("x-rapidapi-host", "weatherbit-v1-mashape.p.rapidapi.com");
+                    request.AddHeader("x-rapidapi-key", "477cde4760msh954a62f20d6a2c8p1cb081jsna55c2b25b7a2");
+                    IRestResponse response = client.Execute(request);
 
-                await _distributedCache.SetStringAsync(forecastKey, response.Content, memoryCacheEntryOptions);
+                    responseBody = JsonConvert.DeserializeObject<Response>(response.Content);
 
-                _logger.LogInformation("returned by API");
-                return Ok(body);
+                    var memoryCacheEntryOptions = new DistributedCacheEntryOptions()
+                    {
+                        AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(timeout),
+                    };
+
+                    await _distributedCache.SetStringAsync(forecastKey, response.Content, memoryCacheEntryOptions);
+
+                    _logger.LogInformation("returned by API");
+                }
             }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+            }
+
+            if (responseBody != null)
+                return Ok(responseBody);
+            else
+                return StatusCode((int)HttpStatusCode.InternalServerError);
         }
     }
 }

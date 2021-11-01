@@ -16,7 +16,7 @@
             "ASPNETCORE_ENVIRONMENT": "Development",
             "var_redis_instance_name": "ForecastCache",
             "var_redis_get_forecast_timeout": "20",
-            "var_redis_conn_string": "redis:6379"
+            "var_redis_conn_string": "localhost:6379"
         }
     },
     "Redis": {
