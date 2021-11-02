@@ -11,6 +11,7 @@ namespace Redis
         {
             Environment.SetEnvironmentVariable("Redis:InstanceName", Environment.GetEnvironmentVariable("var_redis_instance_name"));
             Environment.SetEnvironmentVariable("Redis:GetForecastTimeout", Environment.GetEnvironmentVariable("var_redis_get_forecast_timeout"));
+            Environment.SetEnvironmentVariable("Redis:GetQuotationTimeout", Environment.GetEnvironmentVariable("var_redis_get_quotation_timeout"));
             Environment.SetEnvironmentVariable("Redis:ConnectionString", Environment.GetEnvironmentVariable("var_redis_conn_string"));
 
             CreateHostBuilder(args).Build().Run();

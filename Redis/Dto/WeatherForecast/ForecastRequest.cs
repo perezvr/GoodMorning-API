@@ -1,6 +1,6 @@
-﻿namespace Redis.Dto
+﻿namespace Redis.Dto.WeatherForecast
 {
-    public class Request
+    public class ForecastRequest
     {
         public string Lat { get; set; }
         public string Lon { get; set; }

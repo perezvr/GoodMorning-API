@@ -25,6 +25,10 @@ namespace Redis
 
             });
 
+            services
+                .AddMvc()
+                .AddNewtonsoftJson();
+
             services.AddControllers();
         }
 

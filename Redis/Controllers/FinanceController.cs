@@ -3,7 +3,7 @@ using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using Redis.Dto.WeatherForecast;
+using Redis.Dto.Quotation;
 using RestSharp;
 using System;
 using System.Net;
@@ -13,14 +13,14 @@ namespace Redis.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class WeatherForecastController : ControllerBase
+    public class FinanceController : ControllerBase
     {
-        private readonly ILogger<WeatherForecastController> _logger;
+        private readonly ILogger<FinanceController> _logger;
         private readonly IDistributedCache _distributedCache;
         private readonly IConfiguration _configuration;
 
-        public WeatherForecastController(
-            ILogger<WeatherForecastController> logger,
+        public FinanceController(
+            ILogger<FinanceController> logger,
             IDistributedCache distributedCache,
             IConfiguration configuration)
         {
@@ -30,38 +30,36 @@ namespace Redis.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get([FromQuery] ForecastRequest request)
+        public async Task<IActionResult> Get()
         {
-            ForecastResponse responseBody = null;
+            QuotationResponse responseBody = null;
 
             try
             {
-                _logger.LogInformation("processing new GetForecast request");
+                _logger.LogInformation("processing new GetQuotation request");
 
-                var forecastKeyPrefix = "forecast";
+                var quotationKey = "quotation";
+                var cachedObject = await _distributedCache.GetStringAsync(quotationKey);
 
-                var forecastKey = string.Join("|", forecastKeyPrefix, request.Lat, request.Lon);
-                var cachedObject = await _distributedCache.GetStringAsync(forecastKey);
-
-                responseBody = JsonConvert.DeserializeObject<ForecastResponse>(cachedObject ?? string.Empty);
+                responseBody = JsonConvert.DeserializeObject<QuotationResponse>(cachedObject ?? string.Empty);
 
                 if (responseBody != null)
                     _logger.LogInformation("returned by Redis");
                 else
                 {
-                    var client = new RestClient($"https://api.hgbrasil.com/weather?woeid=455827");
-                    var forecastRequest = new RestRequest(Method.GET);
+                    var client = new RestClient($"https://api.hgbrasil.com/finance?key=5a646002");
+                    var quotationRequest = new RestRequest(Method.GET);
 
-                    IRestResponse response = client.Execute(forecastRequest);
+                    IRestResponse response = client.Execute(quotationRequest);
 
-                    responseBody = JsonConvert.DeserializeObject<ForecastResponse>(response.Content);
+                    responseBody = JsonConvert.DeserializeObject<QuotationResponse>(response.Content);
 
                     var memoryCacheEntryOptions = new DistributedCacheEntryOptions()
                     {
-                        AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(int.Parse(_configuration.GetSection("Redis:GetForecastTimeout").Value)),
+                        AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(int.Parse(_configuration.GetSection("Redis:GetQuotationTimeout").Value)),
                     };
 
-                    await _distributedCache.SetStringAsync(forecastKey, response.Content, memoryCacheEntryOptions);
+                    await _distributedCache.SetStringAsync(quotationKey, response.Content, memoryCacheEntryOptions);
 
                     _logger.LogInformation("returned by API");
                 }
@@ -78,3 +76,4 @@ namespace Redis.Controllers
         }
     }
 }
+

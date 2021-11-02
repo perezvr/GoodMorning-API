@@ -11,11 +11,13 @@
     "IIS Express": {
         "commandName": "IISExpress",
         "launchBrowser": true,
-        "launchUrl": "weatherforecast?lat=-22.5252&lon=-44.1038",
+        "launchUrl": "finance",
+        //"launchUrl": "weatherforecast?lat=-22.5252&lon=-44.1038",
         "environmentVariables": {
             "ASPNETCORE_ENVIRONMENT": "Development",
-            "var_redis_instance_name": "ForecastCache",
+            "var_redis_instance_name": "Cache",
             "var_redis_get_forecast_timeout": "20",
+            "var_redis_get_quotation_timeout": "20",
             "var_redis_conn_string": "localhost:6379"
         }
     },
