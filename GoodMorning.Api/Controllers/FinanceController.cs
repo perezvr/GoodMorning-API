@@ -47,7 +47,7 @@ namespace Redis.Controllers
                     _logger.LogInformation("returned by Redis");
                 else
                 {
-                    var client = new RestClient($"https://api.hgbrasil.com/finance?key=5a646002");
+                    var client = new RestClient($"https://api.hgbrasil.com/finance?key={_configuration.GetSection("HgBrasilApi:Key").Value}");
                     var quotationRequest = new RestRequest(Method.GET);
 
                     IRestResponse response = client.Execute(quotationRequest);

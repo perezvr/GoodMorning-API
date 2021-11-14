@@ -7,14 +7,14 @@ EXPOSE 8091
 FROM mcr.microsoft.com/dotnet/sdk:3.1-alpine AS build
 
 WORKDIR /out
-COPY Redis ./
-RUN dotnet restore "Redis.csproj"
+COPY GoodMorning.Api ./
+RUN dotnet restore "GoodMorning.Api.csproj"
 COPY . .
-WORKDIR "/out/Redis"
-RUN dotnet build "Redis.csproj" -c Release -o /app/build
+WORKDIR "/out/GoodMorning.Api"
+RUN dotnet build "GoodMorning.Api.csproj" -c Release -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "Redis.csproj" -c Release -o /app/publish
+RUN dotnet publish "GoodMorning.Api.csproj" -c Release -o /app/publish
 
 FROM base AS final
 WORKDIR /app
@@ -24,5 +24,5 @@ ENV ASPNETCORE_URLS http://*:8091
 RUN apk add icu-libs
 ENV DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=false
 
-ENTRYPOINT ["dotnet", "Redis.dll"]
+ENTRYPOINT ["dotnet", "GoodMorning.Api.dll"]
 

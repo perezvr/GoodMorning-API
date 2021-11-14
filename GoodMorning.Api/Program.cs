@@ -13,6 +13,7 @@ namespace Redis
             Environment.SetEnvironmentVariable("Redis:GetForecastTimeout", Environment.GetEnvironmentVariable("var_redis_get_forecast_timeout"));
             Environment.SetEnvironmentVariable("Redis:GetQuotationTimeout", Environment.GetEnvironmentVariable("var_redis_get_quotation_timeout"));
             Environment.SetEnvironmentVariable("Redis:ConnectionString", Environment.GetEnvironmentVariable("var_redis_conn_string"));
+            Environment.SetEnvironmentVariable("HgBrasilApi:Key", Environment.GetEnvironmentVariable("var_hbbrasilapi_key"));
 
             CreateHostBuilder(args).Build().Run();
         }
