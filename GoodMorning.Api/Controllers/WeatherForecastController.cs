@@ -30,9 +30,9 @@ namespace Redis.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Get([FromQuery] ForecastRequest request)
+        public async Task<IActionResult> Get([FromQuery] ForecastRequestDto request)
         {
-            ForecastResponse responseBody = null;
+            ForecastResponseDto responseBody = null;
 
             try
             {
@@ -43,18 +43,18 @@ namespace Redis.Controllers
                 var forecastKey = string.Join("|", forecastKeyPrefix, request.Lat, request.Lon);
                 var cachedObject = await _distributedCache.GetStringAsync(forecastKey);
 
-                responseBody = JsonConvert.DeserializeObject<ForecastResponse>(cachedObject ?? string.Empty);
+                responseBody = JsonConvert.DeserializeObject<ForecastResponseDto>(cachedObject ?? string.Empty);
 
                 if (responseBody != null)
                     _logger.LogInformation("returned by Redis");
                 else
                 {
-                    var client = new RestClient($"https://api.hgbrasil.com/weather?woeid=455827");
+                    var client = new RestClient($"https://api.hgbrasil.com/weather?city_name={request.City_Name}&array_limit=7&key={_configuration.GetSection("HgBrasilApi:Key").Value}");
                     var forecastRequest = new RestRequest(Method.GET);
 
                     IRestResponse response = client.Execute(forecastRequest);
 
-                    responseBody = JsonConvert.DeserializeObject<ForecastResponse>(response.Content);
+                    responseBody = JsonConvert.DeserializeObject<ForecastResponseDto>(response.Content);
 
                     var memoryCacheEntryOptions = new DistributedCacheEntryOptions()
                     {

@@ -19,18 +19,18 @@ namespace Redis
         }
 
         public static IHostBuilder CreateHostBuilder(string[] args) =>
-      Host.CreateDefaultBuilder(args)
-          .ConfigureLogging(loggerBuilder =>
-          {
-              loggerBuilder
-                  .ClearProviders()
-                  // Example output: [20/11/20 14:31:30:409] info: ...
-                  .AddConsole(configure => configure.TimestampFormat = "[dd/MM/yy HH:mm:ss:fff] ");
+            Host.CreateDefaultBuilder(args)
+                .ConfigureLogging(loggerBuilder =>
+                {
+                    loggerBuilder
+                        .ClearProviders()
+                        // Example output: [20/11/20 14:31:30:409] info: ...
+                        .AddConsole(configure => configure.TimestampFormat = "[dd/MM/yy HH:mm:ss:fff] ");
 
-          })
-          .ConfigureWebHostDefaults(webBuilder =>
-          {
-              webBuilder.UseStartup<Startup>();
-          });
+                })
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.UseStartup<Startup>();
+                });
     }
 }

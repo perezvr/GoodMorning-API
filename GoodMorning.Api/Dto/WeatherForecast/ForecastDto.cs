@@ -1,6 +1,6 @@
 ﻿namespace Redis.Dto
 {
-    public class Forecast
+    public class ForecastDto
     {
         public string date { get; set; }
         public string weekday { get; set; }

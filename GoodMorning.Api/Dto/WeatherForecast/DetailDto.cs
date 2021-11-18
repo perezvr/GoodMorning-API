@@ -2,7 +2,7 @@
 
 namespace Redis.Dto.WeatherForecast
 {
-    public class Detail
+    public class DetailDto
     {
         public int temp { get; set; }
         public string date { get; set; }
@@ -19,7 +19,7 @@ namespace Redis.Dto.WeatherForecast
         public string sunset { get; set; }
         public string condition_slug { get; set; }
         public string city_name { get; set; }
-        public List<Forecast> forecast { get; set; }
+        public List<ForecastDto> forecast { get; set; }
     }
 
 }
