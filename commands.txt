@@ -1,4 +1,4 @@
-- docker build -t forecast .
-- docker run -dp 8091:8091 --env-file env --name forecast forecast
+- docker build -t goodmorning .
+- docker run -dp 8091:8091 --env-file env --name goodmorning goodmorning
 - docker-compose up -d
 - docker-compose up --build -d (force rebuild)

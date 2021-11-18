@@ -1,8 +1,8 @@
 version: '3.7'
 services:  
-  Forecast:
-    image: forecast
-    container_name: forecast
+  GoodMorning:
+    image: goodmorning
+    container_name: goodmorning
     depends_on:
       - "redis_image"
     build:
@@ -11,7 +11,7 @@ services:
     ports:
       - "8091:8091"
     env_file:
-      - env
+      - .env
     links:
       - "redis_image"  
 
