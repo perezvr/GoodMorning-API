@@ -41,9 +41,16 @@ namespace Redis.Controllers
                 var forecastKeyPrefix = "forecast";
 
                 var forecastKey = string.Join("|", forecastKeyPrefix, request.Lat, request.Lon);
-                var cachedObject = await _distributedCache.GetStringAsync(forecastKey);
 
-                responseBody = JsonConvert.DeserializeObject<ForecastResponseDto>(cachedObject ?? string.Empty);
+                //try
+                //{
+                //    var cachedObject = await _distributedCache.GetStringAsync(forecastKey);
+                //    responseBody = JsonConvert.DeserializeObject<ForecastResponseDto>(cachedObject ?? string.Empty);
+                //}
+                //catch (Exception)
+                //{
+                //    //do nothing
+                //}
 
                 if (responseBody != null)
                     _logger.LogInformation("returned by Redis");
@@ -61,7 +68,14 @@ namespace Redis.Controllers
                         AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(int.Parse(_configuration.GetSection("Redis:GetForecastTimeout").Value)),
                     };
 
-                    await _distributedCache.SetStringAsync(forecastKey, response.Content, memoryCacheEntryOptions);
+                    //try
+                    //{
+                    //    await _distributedCache.SetStringAsync(forecastKey, response.Content, memoryCacheEntryOptions);
+                    //}
+                    //catch (Exception)
+                    //{
+                    //    //do nothing
+                    //}
 
                     _logger.LogInformation("returned by API");
                 }
